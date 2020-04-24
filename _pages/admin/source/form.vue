@@ -250,6 +250,7 @@
           let configName = 'apiRoutes.qfeed.sources'
           this.$crud.update(configName, this.itemId, this.form).then(response => {
             this.$alert.success({message: `${this.$tr('ui.message.recordUpdated')}`})
+            this.$router.push({name: 'qfeed.admin.sources.edit',params:{id: this.itemId}})
             //this.initForm()
             this.loading = false
           }).catch(error => {
@@ -262,7 +263,7 @@
           let configName = 'apiRoutes.qfeed.sources'
           this.$crud.create(configName, this.form).then(response => {
             this.$alert.success({message: `${this.$tr('ui.message.recordCreated')}`})
-            this.$route.push({name: 'qfeed.admin.sources.edit',params: {id: response.data.id}})
+            this.$router.push({name: 'qfeed.admin.sources'})
             //this.initForm()
             this.loading = false
           }).catch(error => {
