@@ -3,5 +3,6 @@ export default {
   updateSource: 'Edit Source',
   form:{
     url: 'Link',
+    options: 'RSS Feed Options',
   }
 }
