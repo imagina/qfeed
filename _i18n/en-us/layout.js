@@ -14,11 +14,11 @@ export default {
       mainImage: 'Source Image',
     },
     items:{
-      title: 'Item Title',
-      description: 'Item Description',
-      slug: 'Item Slug',
-      createdAt: 'Item Created At',
-      mainImage: 'Item Image',
+      title: 'Post Title',
+      description: 'Post Description',
+      slug: 'Post Slug',
+      createdAt: 'Post creation date',
+      mainImage: 'Post Image',
     }
   }
 }

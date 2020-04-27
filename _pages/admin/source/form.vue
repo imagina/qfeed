@@ -67,7 +67,7 @@
               {{ $tr('qfeed.layout.form.item') }}
             </div>
             <div class="col-12 col-md-3" v-for="(element,key2) in defaultOptions.item">
-                <div class="input-title">{{$tr('qfeed.layout.form.sources.'+key2)}}</div>
+                <div class="input-title">{{$tr('qfeed.layout.form.items.'+key2)}}</div>
                 <tree-select
                     v-model="form.options.item[key2]"
                     :append-to-body="true"

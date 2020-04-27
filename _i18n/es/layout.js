@@ -14,11 +14,11 @@ export default {
       mainImage: 'Imagen del Origen',
     },
     items:{
-      title: 'Título del Elemento',
-      description: 'Descripcipon del Elemento',
-      slug: 'URL del Elemento',
-      createdAt: 'Fecha de creación del Elemento',
-      mainImage: 'Imagen del Elemento',
+      title: 'Título del Artículo',
+      description: 'Descripcipon del Artículo',
+      slug: 'URL del Artículo',
+      createdAt: 'Fecha de creación del Artículo',
+      mainImage: 'Imagen del Artículo',
     }
   }
 }
