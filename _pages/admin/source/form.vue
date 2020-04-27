@@ -55,7 +55,6 @@
                       :append-to-body="true"
                       :async="true"
                       class="q-mb-md"
-                      :default-options="optionsElements"
                       :load-options="searchItems"
                       placeholder=""
                       label="name"
@@ -73,7 +72,6 @@
                     :append-to-body="true"
                     :async="true"
                     class="q-mb-md"
-                    :default-options="optionsElements"
                     :load-options="searchItems"
                     placeholder=""
                     label="name"
@@ -247,8 +245,11 @@
       searchItems({action, searchQuery, callback}) {
         if (action === 'ASYNC_SEARCH') {
           //Request
-          this.recursiveElementsSearch(this.rssReturns,null,searchQuery)
-          callback(null, this.$array.tree(this.searchOptions, { label: 'label', id: 'id' }))
+          this.searchOptions = this.$clone(this.optionsElements)
+          this.recursiveElementsSearch(searchQuery)
+          setTimeout(()=> {
+            callback(null, this.$array.tree(this.searchOptions, {label: 'label', id: 'id'}))
+          },100)
         }
       },
       getRSSOptions(){
@@ -279,31 +280,22 @@
         }
         for(let key in element){
           if (parent == null) {
-            this.optionsElements.push({label: key, id: key})
+            if(typeof this.optionsElements[key] == 'undefined')
+                this.optionsElements.push({label: key, id: key})
           } else {
-            this.optionsElements.push({label: parent + '.' + key, id: parent + '.' + key})
+            if(typeof this.optionsElements[parent + '.' + key] == 'undefined')
+                this.optionsElements.push({label: parent + '.' + key, id: parent + '.' + key})
           }
           if(typeof element[key] === 'object'){
             this.recursiveElements(element[key],key)
           }
         }
       },
-      recursiveElementsSearch(element,parent=null,searchQuery = null){
-        if(Array.isArray(element)){
-          this.recursiveElements(element[0],parent,searchQuery)
-          return;
-        }
-        for(let key in element){
-          if(element.lastIndexOf(searchQuery) >= 0 || searchQuery == null) {
-            if (parent == null) {
-              this.searchOptions.push({label: key, id: key})
-            } else {
-              this.searchOptions.push({label: parent + '.' + key, id: parent + '.' + key})
+      recursiveElementsSearch(searchQuery = null){
+        for(let key in this.searchOptions){
+            if(this.searchOptions[key].id.lastIndexOf(searchQuery) < 0) {
+                delete this.searchOptions[key]
             }
-            if (typeof element[key] === 'object') {
-              this.recursiveElements(element[key], key, searchQuery)
-            }
-          }
         }
       },
       async updateItem() {
