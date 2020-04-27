@@ -30,48 +30,55 @@
                     option-value="id"
                     :options="optionsStatus"
           />
-          <crud
-                  type="select"
-                  v-model="form.userId"
-                  :crudData="import('@imagina/quser/_crud/users')"
-                  :crudProps="{
-                    label: `${this.$tr('ui.form.author')}*`,
-                    rules: [
-                      val => !!val || this.$tr('ui.message.fieldRequired')
-                    ],
-                  }"
-                  :config="{
-                    options: {label: 'fullName', value: 'id'},
-                  }"
-                  v-if="checkAdminProfile"
-          />
+            <!--User-->
+            <div class="input-title">{{`${$tr('ui.form.author')}`}}</div>
+            <tree-select
+                    v-model="form.userId"
+                    :async="true"
+                    :append-to-body="true"
+                    class="q-mb-md"
+                    :load-options="searchUsers"
+                    :default-options="optionsUsers"
+                    placeholder=""
+                    label="name"
+            />
+          <div class="row q-col-gutter-md q-pt-sm">
+              <div class="col-12 q-py-sm">
+                <div class="text-h6">{{ $tr('qfeed.layout.form.options') }}</div>
+                <div>{{ $tr('qfeed.layout.form.source') }}</div>
+              </div>
+              <div :class="'col-12'+(Object.keys(option).length === 0?' col-sm-3':'')" v-for="(option,key) in defaultOptions.source">
+                  <!--User-->
+                  <div class="input-title">{{$tr('qfeed.layout.form.sources.'+key)}}</div>
+                  <tree-select
+                      v-model="form.options.source[key]"
+                      :append-to-body="true"
+                      :async="true"
+                      class="q-mb-md"
+                      :default-options="optionsElements"
+                      :load-options="searchItems"
+                      placeholder=""
+                      label="name"
+                  />
+              </div>
+          </div>
           <div class="row q-col-gutter-md">
-              <div class="col-12 q-py-md text-h6">
-                {{ $tr('qfeed.layout.form.options') }}
-              </div>
-              <div :class="'col-12'+(Object.keys(option).length === 0?' col-sm-3':'')" v-for="(option,key) in defaultOptions">
-                <div v-if="Object.keys(option).length === 0">
-
-                    <q-select outlined dense bg-color="white" v-model="form.options[key]"
-                        :label="key"
-                        emit-value map-options
-                        :options="optionsElements"
-                    />
-                </div>
-                <div class="row" v-else>
-                  <div class="col-12 q-pb-sm">
-                    {{ key }}
-                  </div>
-                  <div class="col-12 col-md-3 q-px-md" v-for="(element,key2) in option">
-                    <q-select outlined dense bg-color="white"
-                      :label="key2"
-                      emit-value map-options
-                      :options="optionsElements"
-                      v-model="form.options[key][key2]"
-                    />
-                  </div>
-                </div>
-              </div>
+            <div class="col-12 q-pb-sm">
+              {{ $tr('qfeed.layout.form.item') }}
+            </div>
+            <div class="col-12 col-md-3" v-for="(element,key2) in defaultOptions.item">
+                <div class="input-title">{{$tr('qfeed.layout.form.sources.'+key2)}}</div>
+                <tree-select
+                    v-model="form.options.item[key2]"
+                    :append-to-body="true"
+                    :async="true"
+                    class="q-mb-md"
+                    :default-options="optionsElements"
+                    :load-options="searchItems"
+                    placeholder=""
+                    label="name"
+                />
+            </div>
           </div>
           <q-page-sticky
                   position="bottom-right"
@@ -115,11 +122,13 @@
           status: 1,
           userId: parseInt(this.$store.state.quserAuth.userId),
           options: {
-            title: "",
-            description: "",
-            slug: "",
-            createdAt: "",
-            mainImage: "",
+            source: {
+              title: "",
+              description: "",
+              slug: "",
+              createdAt: "",
+              mainImage: "",
+            },
             item:{
               title: "",
               description: "",
@@ -130,11 +139,13 @@
           }
         },
         defaultOptions: {
-          title: "",
-          description: "",
-          slug: "",
-          createdAt: "",
-          mainImage: "",
+          source: {
+            title: "",
+            description: "",
+            slug: "",
+            createdAt: "",
+            mainImage: "",
+          },
           item:{
             title: "",
             description: "",
@@ -149,14 +160,15 @@
         itemId: false,
         optionsType: [],
         optionsStatus: [],
-        optionsElements: [
-        ]
+        optionsElements:[],
+        optionsUsers: [],
+        searchOptions:[],
       }
     },
     computed: {
       checkAdminProfile(){
         let adminProfile = false
-        let roles = this.$store.state.quserAuth.roles.foreach(item =>{
+        this.$store.state.quserAuth.userData.roles.forEach(item =>{
           if(item.slug==='admin'){
             adminProfile = true
           }
@@ -177,6 +189,7 @@
       },
       getData() {
         return new Promise((resolve, reject) => {
+          this.optionsUsers = this.$array.tree([this.$store.state.quserAuth.userData], {label: 'fullName', id: 'id'})
           const itemId = this.$clone(this.itemId)
           if (itemId) {
             let configName = 'apiRoutes.qfeed.sources'
@@ -184,13 +197,20 @@
             let params = {
               refresh: true,
               params: {
+                include: 'user',
                 filter: {allTranslations: true}
               }
             }
             //Request
             this.$crud.show(configName, itemId, params).then(response => {
                 Object.assign(this.form, { ...response.data })
+                if(response.data.user != null) {
+                  this.optionsUsers = this.$array.tree([response.data.user], {label: 'fullName', id: 'id'})
+                }else{
+                  this.optionsUsers = this.$array.tree([this.$store.state.quserAuth.userData], {label: 'fullName', id: 'id'})
+                }
                 this.getRSSOptions()
+                this.optionsElements = this.$array.tree(this.optionsElements, {label: 'label', id: 'id'})
                 setTimeout(()=>{
                   this.form.type = parseInt(response.data.type)
                   this.form.status = parseInt(response.data.status)
@@ -207,6 +227,29 @@
             resolve(true)//Resolve
           }
         })
+      },
+      //Search users
+      searchUsers({action, searchQuery, callback}) {
+        if (action === 'ASYNC_SEARCH') {
+          let configName = 'apiRoutes.quser.users'
+          let params = {//Params to request
+            params: {filter: {search: searchQuery}},
+          }
+          //Request
+          this.$crud.index(configName, params).then(response => {
+            callback(null, this.$array.tree(response.data, { label: 'fullName', id: 'id' }))
+          }).catch(error => {
+            this.$alert.error({message: this.$tr('ui.message.errorRequest'), pos: 'bottom'})
+          })
+        }
+      },
+      //Search rss items
+      searchItems({action, searchQuery, callback}) {
+        if (action === 'ASYNC_SEARCH') {
+          //Request
+          this.recursiveElementsSearch(this.rssReturns,null,searchQuery)
+          callback(null, this.$array.tree(this.searchOptions, { label: 'label', id: 'id' }))
+        }
       },
       getRSSOptions(){
         this.loading = true
@@ -236,12 +279,30 @@
         }
         for(let key in element){
           if (parent == null) {
-            this.optionsElements.push({label: key, value: key})
+            this.optionsElements.push({label: key, id: key})
           } else {
-            this.optionsElements.push({label: parent + key, value: parent + key})
+            this.optionsElements.push({label: parent + '.' + key, id: parent + '.' + key})
           }
           if(typeof element[key] === 'object'){
             this.recursiveElements(element[key],key)
+          }
+        }
+      },
+      recursiveElementsSearch(element,parent=null,searchQuery = null){
+        if(Array.isArray(element)){
+          this.recursiveElements(element[0],parent,searchQuery)
+          return;
+        }
+        for(let key in element){
+          if(element.lastIndexOf(searchQuery) >= 0 || searchQuery == null) {
+            if (parent == null) {
+              this.searchOptions.push({label: key, id: key})
+            } else {
+              this.searchOptions.push({label: parent + '.' + key, id: parent + '.' + key})
+            }
+            if (typeof element[key] === 'object') {
+              this.recursiveElements(element[key], key, searchQuery)
+            }
           }
         }
       },
