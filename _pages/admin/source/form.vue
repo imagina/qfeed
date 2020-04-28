@@ -280,14 +280,35 @@
         }
         for(let key in element){
           if (parent == null) {
-            if(typeof this.optionsElements[key] == 'undefined')
-                this.optionsElements.push({label: key, id: key})
+            let exists = false
+            for(let el of this.optionsElements){
+              if(el.id === key){
+                exists = true
+                break
+              }
+            }
+            if(exists === false) {
+              this.optionsElements.push({label: key, id: key})
+            }
           } else {
-            if(typeof this.optionsElements[parent + '.' + key] == 'undefined')
+            if (typeof this.optionsElements[parent + '.' + key] == 'undefined')
+              if(parent === 'item') {
+                let exists = false
+                for(let el2 of this.optionsElements){
+                  if(el2.id === key){
+                    exists = true
+                    break
+                  }
+                }
+                if(exists === false){
+                  this.optionsElements.push({label: key, id: key,})
+                }
+              }else{
                 this.optionsElements.push({label: parent + '.' + key, id: parent + '.' + key})
+              }
           }
           if(typeof element[key] === 'object'){
-            this.recursiveElements(element[key],key)
+            this.recursiveElements(element[key],parent && parent !== 'item' ? parent + '.' + key : key)
           }
         }
       },

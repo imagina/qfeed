@@ -1,6 +1,6 @@
 ## QFEED  | 0.0.1
 
-_Nota: Backend vérsion compatible [asgard_cms-qfeed](https://github.com/imagina/asgardcms-ifeed)_
+_Nota: Backend vérsion compatible [asgardcms-ifeeds](https://github.com/imagina/asgardcms-ifeeds)_
 
 ## Installation
 
